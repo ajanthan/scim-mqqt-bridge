@@ -16,13 +16,14 @@
  ~ specific language governing permissions and limitations
  ~ under the License.
  -->
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-<parent>
-    <groupId>org.wso2.carbon.identity.outbound.provisioning.sample</groupId>
-    <artifactId>org.wso2.carbon.identity.provisioning.mqtt.bridge.parent</artifactId>
-    <version>0.0.1</version>
-    <relativePath>../pom.xml</relativePath>
-</parent>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.wso2.carbon.identity.outbound.provisioning.sample</groupId>
+        <artifactId>org.wso2.carbon.identity.provisioning.mqtt.bridge.parent</artifactId>
+        <version>0.0.1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mqtt-identity-provisioning-connector</artifactId>
     <name>WSO2 IS- MQTT Bridge- Provisioning Connector</name>
@@ -101,8 +102,9 @@
                         </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Embed-Dependency>hawtbuf;scope=compile|runtime,
-                                     hawtdispatch;scope=compile|runtime,
-                                     hawtdispatch-transport;scope=compile|runtime</Embed-Dependency>
+                            hawtdispatch;scope=compile|runtime,
+                            hawtdispatch-transport;scope=compile|runtime
+                        </Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
                     </instructions>
                 </configuration>

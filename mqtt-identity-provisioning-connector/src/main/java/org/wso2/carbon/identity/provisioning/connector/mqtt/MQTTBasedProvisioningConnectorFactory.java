@@ -40,7 +40,7 @@ public class MQTTBasedProvisioningConnectorFactory extends AbstractProvisioningC
      * @throws IdentityProvisioningException
      */
     protected MQTTBasedProvisioningConnector buildConnector(Property[] provisioningProperties)
-            throws IdentityProvisioningException {
+        throws IdentityProvisioningException {
         MQTTBasedProvisioningConnector scimProvisioningConnector = new MQTTBasedProvisioningConnector();
         scimProvisioningConnector.init(provisioningProperties);
 

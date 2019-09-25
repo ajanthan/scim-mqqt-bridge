@@ -23,7 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.hawtbuf.codec.ObjectCodec;
-import org.fusesource.mqtt.client.*;
+import org.fusesource.mqtt.client.Callback;
+import org.fusesource.mqtt.client.CallbackConnection;
+import org.fusesource.mqtt.client.MQTT;
+import org.fusesource.mqtt.client.QoS;
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.provisioning.*;
 
@@ -43,37 +46,37 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
     public void init(Property[] provisioningProperties) throws IdentityProvisioningException {
         String host = null;
         int port = 0;
-        String mqttUsername=null;
-        String mqttPassword=null;
+        String mqttUsername = null;
+        String mqttPassword = null;
         if (provisioningProperties != null && provisioningProperties.length > 0) {
 
             for (Property property : provisioningProperties) {
 
                 if (MQTTBasedProvisioningConnectorConstants.MQTT_HOST.equals(property.getName())) {
-                    host=property.getValue();
-                    if (host==null || "".equals(host)){
-                        host="localhost";
+                    host = property.getValue();
+                    if (host == null || "".equals(host)) {
+                        host = "localhost";
                     }
                 } else if (MQTTBasedProvisioningConnectorConstants.MQTT_PORT.equals(property.getName())) {
                     try {
-                        port=Integer.parseInt(property.getValue());
-                    } catch (NumberFormatException e){
-                        port=1883;
+                        port = Integer.parseInt(property.getValue());
+                    } catch (NumberFormatException e) {
+                        port = 1883;
                     }
-                    if (port<=0){
-                        port=1883;
+                    if (port <= 0) {
+                        port = 1883;
                     }
 
                 } else if (MQTTBasedProvisioningConnectorConstants.MQTT_USERNAME.equals(property.getName())) {
-                    mqttUsername=property.getValue();
+                    mqttUsername = property.getValue();
 
                 } else if (MQTTBasedProvisioningConnectorConstants.MQTT_PASSWORD.equals(property.getName())) {
-                    mqttPassword=property.getValue();
+                    mqttPassword = property.getValue();
                 } else if (MQTTBasedProvisioningConnectorConstants.MQTT_TOPIC.equals(property.getName())) {
-                    mqttTopic=property.getValue();
-                    if("".equals(mqttTopic) || mqttTopic==null){
+                    mqttTopic = property.getValue();
+                    if ("".equals(mqttTopic) || mqttTopic == null) {
                         log.warn("Invalid topic name. Using mqtt-scim-bridge");
-                        mqttTopic="mqtt-scim-bridge";
+                        mqttTopic = "mqtt-scim-bridge";
                     }
                 }
 
@@ -88,18 +91,18 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
         try {
             mqtt.setHost(host, port);
         } catch (URISyntaxException e) {
-           log.error(e);
-           throw new IdentityProvisioningException(e);
+            log.error(e);
+            throw new IdentityProvisioningException(e);
         }
         if (mqttUsername != null && !"".equals(mqttUsername) && mqttPassword != null) {
             mqtt.setUserName(mqttUsername);
             mqtt.setPassword(mqttPassword);
         }
-        }
+    }
 
     @Override
     public ProvisionedIdentifier provision(final ProvisioningEntity provisioningEntity)
-            throws IdentityProvisioningException {
+        throws IdentityProvisioningException {
         if (provisioningEntity != null) {
             if (provisioningEntity.isJitProvisioning() && !isJitProvisioningEnabled()) {
                 log.debug("JIT provisioning disabled for MQTT connector");
@@ -109,30 +112,32 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
             connection.connect(new Callback<Void>() {
                 public void onFailure(Throwable value) {
                     // result.failure(value); // If we could not connect to the server.
-                    log.error("Failed to connect to broker",value);
+                    log.error("Failed to connect to broker", value);
                 }
+
                 // Once we connect..
                 public void onSuccess(Void v) {
-                     log.info("Connected to broker");
+                    log.info("Connected to broker");
                     // Subscribe to a topic
-                    ObjectCodec<String> codec=new ObjectCodec<>();
+                    ObjectCodec<String> codec = new ObjectCodec<>();
 
-                    ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     try {
-                        codec.encode(provisioningEntity,new DataOutputStream(outputStream));
+                        codec.encode(provisioningEntity, new DataOutputStream(outputStream));
 
                     } catch (IOException e) {
-                        log.error("Failed to encode provisioning entity",e);
+                        log.error("Failed to encode provisioning entity", e);
                     }
-                    Buffer buffer=new Buffer(outputStream.toByteArray());
+                    Buffer buffer = new Buffer(outputStream.toByteArray());
 
                     // Send a message to a topic
                     connection.publish(UTF8Buffer.utf8(mqttTopic), buffer, QoS.AT_LEAST_ONCE, false, new Callback<Void>() {
                         public void onSuccess(Void v) {
                             log.info("Published provisioning event to broker");
                         }
+
                         public void onFailure(Throwable value) {
-                            log.error("Failed to publish to broker",value);
+                            log.error("Failed to publish to broker", value);
                         }
                     });
                     // To disconnect..
@@ -140,6 +145,7 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
                         public void onSuccess(Void v) {
                             // called once the connection is disconnected.
                         }
+
                         public void onFailure(Throwable value) {
                             // Disconnects never fail.
                         }

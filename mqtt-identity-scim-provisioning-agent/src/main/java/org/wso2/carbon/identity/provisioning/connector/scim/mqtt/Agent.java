@@ -117,10 +117,10 @@ public class Agent {
             public void onSuccess(Void v) {
 
                 // Subscribe to a topic
-                String topicName=configProperties.getProperty(Constants.MQTT_TOPIC);
-                if ("".equals(topicName) || topicName==null){
+                String topicName = configProperties.getProperty(Constants.MQTT_TOPIC);
+                if ("".equals(topicName) || topicName == null) {
                     log.warn("Invalid topic name. Using mqtt-scim-bridge");
-                    topicName="mqtt-scim-bridge";
+                    topicName = "mqtt-scim-bridge";
                 }
                 Topic[] topics = { new Topic(topicName, QoS.AT_LEAST_ONCE) };
                 connection.subscribe(topics, new Callback<byte[]>() {
