@@ -33,8 +33,8 @@ public class Constants {
     public static final String MQTT_USERNAME = "mqtt-username";
     public static final String MQTT_PASSWORD = "mqtt-password";
     public static final String MQTT_TOPIC = "mqtt-topic";
-    public static final String SSL_TRUSTSTORE = "ssl-trustrore";
-    public static final String SSL_TRUSTSTORE_PASSWORD = "ssl-trusttore-password=wso2carbon";
+    public static final String SSL_TRUSTSTORE = "ssl-truststore";
+    public static final String SSL_TRUSTSTORE_PASSWORD = "ssl-truststore-password";
 
     private Constants() {
     }

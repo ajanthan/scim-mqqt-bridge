@@ -59,48 +59,57 @@ public class MQTTBasedProvisioningConnectorFactory extends AbstractProvisioningC
     public List<Property> getConfigurationProperties() {
         List<Property> properties = new ArrayList<>();
 
+        Property userstoreDomain = new Property();
+
+        userstoreDomain.setName(MQTTBasedProvisioningConnectorConstants.USERSTORE_DOMAIN);
+        userstoreDomain.setDisplayName("Userstore Domain");
+        userstoreDomain.setDisplayOrder(1);
+        userstoreDomain.setDefaultValue("PRIMARY");
+
         Property username = new Property();
+
         username.setName(MQTTBasedProvisioningConnectorConstants.MQTT_USERNAME);
         username.setDisplayName("Connection Username");
-        username.setDisplayOrder(1);
+        username.setDisplayOrder(2);
         username.setRequired(true);
 
         Property userPassword = new Property();
         userPassword.setName(MQTTBasedProvisioningConnectorConstants.MQTT_PASSWORD);
         userPassword.setDisplayName("Connection Password");
         userPassword.setConfidential(true);
-        userPassword.setDisplayOrder(2);
+        userPassword.setDisplayOrder(3);
         userPassword.setRequired(true);
 
         Property host = new Property();
         host.setName(MQTTBasedProvisioningConnectorConstants.MQTT_HOST);
         host.setDisplayName("MQTT Server Host");
-        host.setDisplayOrder(3);
+        host.setDisplayOrder(4);
         host.setRequired(true);
 
         Property port = new Property();
         port.setName(MQTTBasedProvisioningConnectorConstants.MQTT_PORT);
         port.setDisplayName("MQTT Server Port");
-        port.setDisplayOrder(4);
+        port.setDisplayOrder(5);
         port.setRequired(true);
 
 
         Property topic = new Property();
         topic.setName(MQTTBasedProvisioningConnectorConstants.MQTT_TOPIC);
         topic.setDisplayName("MQTT Topic");
-        topic.setDisplayOrder(5);
+        topic.setDisplayOrder(6);
 
         Property passwordProvisioning = new Property();
         passwordProvisioning.setName(MQTTBasedProvisioningConnectorConstants.SCIM_ENABLE_PASSWORD_PROVISIONING);
         passwordProvisioning.setDisplayName("Enable Password Provisioning");
         passwordProvisioning.setDescription("Enable User password provisioning to a SCIM2 domain");
-        passwordProvisioning.setDisplayOrder(6);
+        passwordProvisioning.setDisplayOrder(7);
 
         Property defaultPassword = new Property();
         defaultPassword.setName(MQTTBasedProvisioningConnectorConstants.SCIM_DEFAULT_PASSWORD);
         defaultPassword.setDisplayName("Default Password");
-        defaultPassword.setDisplayOrder(7);
+        defaultPassword.setDisplayOrder(8);
 
+        properties.add(userstoreDomain);
         properties.add(username);
         properties.add(userPassword);
         properties.add(host);

@@ -216,7 +216,7 @@ public class Agent {
         userStoreDomain.setName(Constants.SCIM_USERSTORE_DOMAIN);
         userStoreDomain.setDisplayName("User Store Domain");
         userStoreDomain.setDisplayOrder(5);
-        userStoreDomain.setValue("PRIMARY");
+        userStoreDomain.setValue("SHIPUPDATE");
 
         Property passwordProvisioning = new Property();
         passwordProvisioning.setName(Constants.SCIM_ENABLE_PASSWORD_PROVISIONING);

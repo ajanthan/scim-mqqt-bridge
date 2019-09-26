@@ -27,8 +27,11 @@ import org.fusesource.mqtt.client.Callback;
 import org.fusesource.mqtt.client.CallbackConnection;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.provisioning.*;
+import org.wso2.carbon.identity.scim.common.group.SCIMGroupHandler;
+import org.wso2.carbon.identity.scim.common.utils.IdentitySCIMException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -39,6 +42,7 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
 
     private static final long serialVersionUID = -2800777564581005554L;
     private static Log log = LogFactory.getLog(MQTTBasedProvisioningConnector.class);
+    private static String userStoreDomain;
     private String mqttTopic;
     private MQTT mqtt;
 
@@ -72,6 +76,9 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
 
                 } else if (MQTTBasedProvisioningConnectorConstants.MQTT_PASSWORD.equals(property.getName())) {
                     mqttPassword = property.getValue();
+                } else if (MQTTBasedProvisioningConnectorConstants.USERSTORE_DOMAIN.equals(property.getName())) {
+                    userStoreDomain = property.getValue();
+
                 } else if (MQTTBasedProvisioningConnectorConstants.MQTT_TOPIC.equals(property.getName())) {
                     mqttTopic = property.getValue();
                     if ("".equals(mqttTopic) || mqttTopic == null) {
@@ -103,11 +110,34 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
     @Override
     public ProvisionedIdentifier provision(final ProvisioningEntity provisioningEntity)
         throws IdentityProvisioningException {
-        if (provisioningEntity != null) {
+        if (provisioningEntity != null && userStoreDomain.equals(getDomainFromEntityName(provisioningEntity.getEntityName()))) {
             if (provisioningEntity.isJitProvisioning() && !isJitProvisioningEnabled()) {
                 log.debug("JIT provisioning disabled for MQTT connector");
                 return null;
             }
+            log.info("Entity name: " + provisioningEntity.getEntityName());
+            if (provisioningEntity.getEntityType() == ProvisioningEntityType.GROUP) {
+                String roleNameWithDomain = "SHIPUPDATE" + "/" + provisioningEntity.getEntityName();
+                if (provisioningEntity.getOperation() == ProvisioningOperation.DELETE) {
+                    //
+                } else if (provisioningEntity.getOperation() == ProvisioningOperation.POST) {
+                    SCIMGroupHandler scimGroupHandler = new SCIMGroupHandler(CarbonContext.getThreadLocalCarbonContext().getTenantId());
+                    try {
+                        if (!scimGroupHandler.isGroupExisting(roleNameWithDomain)) {
+                            //if no attributes - i.e: group added via mgt console, not via SCIM endpoint
+                            //add META
+                            scimGroupHandler.addMandatoryAttributes(roleNameWithDomain);
+                        }
+                    } catch (IdentitySCIMException e) {
+                        throw new IdentityProvisioningException("Error retrieving group information from SCIM Tables.", e);
+                    }
+
+                }
+            } else {
+                log.info("SCIM group endpoint is not configured in Identity Provider configurations. Skip " +
+                    "performing " + provisioningEntity.getOperation() + " for outbound group resource.");
+            }
+
             final CallbackConnection connection = mqtt.callbackConnection();
             connection.connect(new Callback<Void>() {
                 public void onFailure(Throwable value) {
@@ -158,4 +188,13 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
 
     }
 
+    private String getDomainFromEntityName(String username) {
+        int index;
+        if ((index = username.indexOf("/")) > 0) {
+            String domain = username.substring(0, index);
+            return domain;
+        } else {
+            return "PRIMARY";
+        }
+    }
 }

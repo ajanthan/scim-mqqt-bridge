@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.provisioning.connector.mqtt;
 
 public class MQTTBasedProvisioningConnectorConstants {
 
+    public static final String USERSTORE_DOMAIN = "userstore-domain";
     public static final String MQTT_HOST = "mqtt-host";
     public static final String MQTT_PORT = "mqtt-port";
     public static final String MQTT_USERNAME = "mqtt-username";
@@ -27,6 +28,7 @@ public class MQTTBasedProvisioningConnectorConstants {
     public static final String MQTT_TOPIC = "mqtt-topic";
     public static final String SCIM_ENABLE_PASSWORD_PROVISIONING = "mqtt-enable-pwd-provisioning";
     public static final String SCIM_DEFAULT_PASSWORD = "mqtt-default-pwd";
+
     private MQTTBasedProvisioningConnectorConstants() {
     }
 }
