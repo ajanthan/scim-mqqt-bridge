@@ -133,10 +133,10 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
                     }
 
                 }
-            } else {
-                log.info("SCIM group endpoint is not configured in Identity Provider configurations. Skip " +
-                    "performing " + provisioningEntity.getOperation() + " for outbound group resource.");
-            }
+            } //else {
+//                log.info("SCIM group endpoint is not configured in Identity Provider configurations. Skip " +
+//                    "performing " + provisioningEntity.getOperation() + " for outbound group resource.");
+//            }
 
             final CallbackConnection connection = mqtt.callbackConnection();
             connection.connect(new Callback<Void>() {

@@ -162,7 +162,7 @@ public class Agent {
 
     }
 
-    private static Properties getConfig(String configFile) {
+    public static Properties getConfig(String configFile) {
         FileReader fileReader = null;
         try {
             fileReader = new FileReader(configFile);
@@ -216,7 +216,7 @@ public class Agent {
         userStoreDomain.setName(Constants.SCIM_USERSTORE_DOMAIN);
         userStoreDomain.setDisplayName("User Store Domain");
         userStoreDomain.setDisplayOrder(5);
-        userStoreDomain.setValue("SHIPUPDATE");
+        userStoreDomain.setValue(configProperties.getProperty(Constants.SCIM_USERSTORE_DOMAIN));
 
         Property passwordProvisioning = new Property();
         passwordProvisioning.setName(Constants.SCIM_ENABLE_PASSWORD_PROVISIONING);

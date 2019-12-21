@@ -105,7 +105,7 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
                 }
 
             } else if (provisioningEntity.getEntityType() == ProvisioningEntityType.GROUP) {
-                if (StringUtils.isNotBlank(scimProvider.getProperties().get(SCIMConfigConstants
+                if (StringUtils.isNotEmpty(scimProvider.getProperties().get(SCIMConfigConstants
                     .ELEMENT_NAME_GROUP_ENDPOINT))) {
                     if (provisioningEntity.getOperation() == ProvisioningOperation.DELETE) {
                         deleteGroup(provisioningEntity);
@@ -158,7 +158,7 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
                         "" + "Groups unassigned: " + deletedGroupList);
                 }
 
-                if (StringUtils.isNotBlank(scimProvider.getProperties().get(SCIMConfigConstants
+                if (StringUtils.isNotEmpty(scimProvider.getProperties().get(SCIMConfigConstants
                     .ELEMENT_NAME_GROUP_ENDPOINT))) {
 
                     if (newGroupList != null) {
@@ -208,7 +208,7 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
                 }
             }
         } catch (Exception e) {
-            throw new IdentityProvisioningException("Error while creating the user", e);
+            throw new IdentityProvisioningException("Error while updating the user", e);
         }
     }
 
@@ -240,31 +240,37 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
             user.setSchemaList(Arrays.asList(SCIMConstants.CORE_SCHEMA_URI));
             user.setUserName(userName);
             setUserPassword(user, userEntity);
-
-            ProvisioningClient scimProvsioningClient = new ProvisioningClient(scimProvider, user,
-                httpMethod, null);
-            scimProvsioningClient.provisionCreateUser();
-
-            List<String> newGroupList = userEntity.getAttributes().get(ClaimMapping.build
+            List<String> groupList = userEntity.getAttributes().get(ClaimMapping.build
                 (IdentityProvisioningConstants.GROUP_CLAIM_URI, null, null, false));
 
-            if (CollectionUtils.isNotEmpty(newGroupList)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("User : " + userName + " is assigned to groups. Groups assigned: " + newGroupList);
-                }
-
-                if (StringUtils.isNotBlank(scimProvider.getProperties().get(SCIMConfigConstants
-                    .ELEMENT_NAME_GROUP_ENDPOINT))) {
-                    for (String newGroup : newGroupList) {
-                        updateGroupsOfUser(userEntity, newGroup, true);
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("SCIM group endpoint is not configured in Identity Provider configurations. Skip "
-                            + "initiating group updates for user: " + userName + " to groups: " + newGroupList);
-                    }
-                }
-            }
+            UserMgtSOAPClient userMgtSOAPClient=new UserMgtSOAPClient();
+            userMgtSOAPClient.init("https://localhost:9443/services/","admin","admin");
+            //userMgtSOAPClient.createRemoteUserStoreManager();
+            userMgtSOAPClient.AddUser(user.getUserName(),user.getPassword(),groupList.toArray(new String[0]));
+//            ProvisioningClient scimProvsioningClient = new ProvisioningClient(scimProvider, user,
+//                httpMethod, null);
+//            scimProvsioningClient.provisionCreateUser();
+//
+//            List<String> newGroupList = userEntity.getAttributes().get(ClaimMapping.build
+//                (IdentityProvisioningConstants.GROUP_CLAIM_URI, null, null, false));
+//
+//            if (CollectionUtils.isNotEmpty(newGroupList)) {
+//                if (log.isDebugEnabled()) {
+//                    log.debug("User : " + userName + " is assigned to groups. Groups assigned: " + newGroupList);
+//                }
+//
+//                if (StringUtils.isNotEmpty(scimProvider.getProperties().get(SCIMConfigConstants
+//                    .ELEMENT_NAME_GROUP_ENDPOINT))) {
+//                    for (String newGroup : newGroupList) {
+//                        updateGroupsOfUser(userEntity, newGroup, true);
+//                    }
+//                } else {
+//                    if (log.isDebugEnabled()) {
+//                        log.debug("SCIM group endpoint is not configured in Identity Provider configurations. Skip "
+//                            + "initiating group updates for user: " + userName + " to groups: " + newGroupList);
+//                    }
+//                }
+//            }
 
         } catch (Exception e) {
             throw new IdentityProvisioningException("Error while creating the user", e);
@@ -472,9 +478,9 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
         List<String> claimValues = ProvisioningUtil.getClaimValues(attributeMap,
             IdentityProvisioningConstants.PASSWORD_CLAIM_URI, null);
 
-        if (CollectionUtils.isNotEmpty(claimValues) && StringUtils.isNotBlank(claimValues.get(0))) {
+        if (CollectionUtils.isNotEmpty(claimValues) && StringUtils.isNotEmpty(claimValues.get(0))) {
             password = claimValues.get(0);
-        } else if (StringUtils.isNotBlank(scimProvider.getProperty(Constants
+        } else if (StringUtils.isNotEmpty(scimProvider.getProperty(Constants
             .SCIM_DEFAULT_PASSWORD))) {
             if (log.isDebugEnabled()) {
                 log.debug("Could not get the password for the user. Setting default password as the user password");
@@ -493,7 +499,7 @@ public class MQTTBasedProvisioningConnector extends AbstractOutboundProvisioning
         if (Boolean.parseBoolean(scimProvider.getProperty(Constants
             .SCIM_ENABLE_PASSWORD_PROVISIONING))) {
             user.setPassword(getPassword(userEntity.getAttributes()));
-        } else if (StringUtils.isNotBlank(scimProvider.getProperty(Constants.SCIM_DEFAULT_PASSWORD))) {
+        } else if (StringUtils.isNotEmpty(scimProvider.getProperty(Constants.SCIM_DEFAULT_PASSWORD))) {
             user.setPassword(scimProvider.getProperty(Constants.SCIM_DEFAULT_PASSWORD));
         }
     }
